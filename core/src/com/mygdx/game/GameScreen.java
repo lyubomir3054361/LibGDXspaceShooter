@@ -3,6 +3,9 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,7 +27,6 @@ public class GameScreen implements Screen {
     Texture shotImage;
     Texture asteroidImage;
 
-    //TODO:
     Texture explosionImage;
     TextureRegion[][] explosionAnimation;
     Sprite explosionSprite;
@@ -40,6 +42,9 @@ public class GameScreen implements Screen {
     long lastAsteroidSpawnTime;
     int spaceShipSpeed;
     int asteroidSpeed;
+
+    Sound shotSound;
+    Music explosionSound;
 
     Array<Rectangle> singleShots;
     Array<Rectangle> asteroids;
@@ -78,6 +83,9 @@ public class GameScreen implements Screen {
         explosionSprite.setX(initialExplosionX);
         explosionSprite.setY(initialExplosionY);
 
+        shotSound = Gdx.audio.newSound(Gdx.files.internal("shotSound.wav"));
+        explosionSound = Gdx.audio.newMusic(Gdx.files.internal("explosionSound.wav"));
+
     }
 
     private void spaceShipSingleFire(){
@@ -88,6 +96,7 @@ public class GameScreen implements Screen {
         singleShot.y = spaceShip.y + singleShot.height*4;
         singleShots.add(singleShot);
         lastFiredTime = TimeUtils.nanoTime();
+        shotSound.play();
     }
 
     private void spawnAsteroid(){
@@ -153,6 +162,8 @@ public class GameScreen implements Screen {
                 Rectangle asteroid = asteroidShot.next();
                 if(asteroid.overlaps(singleShot)){
 
+                    //TODO: SYNCHRONIZE SOUNDS
+                    explosionSound.play();
                     explosionSprite.setX(asteroid.x);
                     explosionSprite.setY(asteroid.y);
 
@@ -258,6 +269,8 @@ public class GameScreen implements Screen {
         spaceShipImage.dispose();
         asteroidImage.dispose();
         explosionImage.dispose();
+        shotSound.dispose();
+        explosionSound.dispose();
     }
 
 }
