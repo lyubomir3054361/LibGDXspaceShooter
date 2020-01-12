@@ -42,7 +42,7 @@ public class GameScreen implements Screen {
     int initialExplosionY;
 
     Sound shotSound;
-    Music explosionSound;
+    Sound explosionSound;
 
     Array<Rectangle> singleShots;
     Array<Rectangle> asteroids;
@@ -80,7 +80,7 @@ public class GameScreen implements Screen {
 
         shotSound = Gdx.audio.newSound(Gdx.files.internal("shotSound.wav"));
 
-        explosionSound = Gdx.audio.newMusic(Gdx.files.internal("explosionSound.wav"));
+        explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosionSound.wav"));
 
         spawnAsteroid();
     }
@@ -110,6 +110,7 @@ public class GameScreen implements Screen {
 
         //TODO: SYNCHRONIZE SOUNDS
         explosionSound.play();
+
         explosionSprite.setX(asteroid.x);
         explosionSprite.setY(asteroid.y);
 
