@@ -6,10 +6,13 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.Timer;
 
 import java.util.Iterator;
 
@@ -20,6 +23,14 @@ public class GameScreen implements Screen {
     Texture spaceShipImage;
     Texture shotImage;
     Texture asteroidImage;
+
+    //TODO:
+    Texture explosionImage;
+    TextureRegion[][] explosionAnimation;
+    Sprite explosionSprite;
+    int frame;
+    int initialExplosionX;
+    int initialExplosionY;
 
     Rectangle spaceShip;
 
@@ -55,6 +66,18 @@ public class GameScreen implements Screen {
         singleShots = new Array<Rectangle>();
         asteroids = new Array<Rectangle>();
         spawnAsteroid();
+
+        //TODO: CREATE AN EXPLOSION ARRAY
+        explosionImage = new Texture("explosion.png");
+        explosionAnimation = TextureRegion.split(explosionImage,96,96);
+        explosionSprite = new Sprite(explosionAnimation[0][0]);
+
+        initialExplosionX = 650;
+        initialExplosionY = 850;
+
+        explosionSprite.setX(initialExplosionX);
+        explosionSprite.setY(initialExplosionY);
+
     }
 
     private void spaceShipSingleFire(){
@@ -86,23 +109,6 @@ public class GameScreen implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
-        /**
-         *
-         * Drawing objects
-         *
-         */
-        game.batch.begin();
-
-        game.batch.draw(spaceShipImage, spaceShip.x, spaceShip.y, spaceShip.width, spaceShip.height);
-
-        for(Rectangle shot : singleShots){
-            game.batch.draw(shotImage, shot.x, shot.y, shot.width, shot.height);
-        }
-        for(Rectangle asteroid : asteroids){
-            game.batch.draw(asteroidImage, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
-        }
-
-        game.batch.end();
 
         /**
          *
@@ -146,6 +152,23 @@ public class GameScreen implements Screen {
             while(asteroidShot.hasNext()){
                 Rectangle asteroid = asteroidShot.next();
                 if(asteroid.overlaps(singleShot)){
+
+                    explosionSprite.setX(asteroid.x);
+                    explosionSprite.setY(asteroid.y);
+
+                    Timer.schedule(new Timer.Task() {
+                        @Override
+                        public void run() {
+                            frame++;
+                            if(frame > 7){
+                                frame = 0;
+                                explosionSprite.setY(initialExplosionY);
+                                explosionSprite.setX(initialExplosionX);
+                            }
+                            explosionSprite.setRegion(explosionAnimation[0][frame]);
+                        }
+                    }, 0, 1/20f, 7);
+
                     asteroidShot.remove();
                     singleShotIterator.remove();
                 }
@@ -182,6 +205,25 @@ public class GameScreen implements Screen {
             spaceShip.y = 800 - spaceShip.height;
         }
 
+        /**
+         *
+         * Drawing objects
+         *
+         */
+        game.batch.begin();
+
+        game.batch.draw(spaceShipImage, spaceShip.x, spaceShip.y, spaceShip.width, spaceShip.height);
+
+        for(Rectangle shot : singleShots){
+            game.batch.draw(shotImage, shot.x, shot.y, shot.width, shot.height);
+        }
+        for(Rectangle asteroid : asteroids){
+            game.batch.draw(asteroidImage, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
+        }
+
+        game.batch.draw(explosionSprite, explosionSprite.getX(), explosionSprite.getY(), explosionSprite.getWidth(), explosionSprite.getHeight());
+
+        game.batch.end();
 
     }
 
@@ -215,6 +257,7 @@ public class GameScreen implements Screen {
         shotImage.dispose();
         spaceShipImage.dispose();
         asteroidImage.dispose();
+        explosionImage.dispose();
     }
 
 }
