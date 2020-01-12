@@ -3,9 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -40,6 +38,7 @@ public class GameScreen implements Screen {
     int frame;
     int initialExplosionX;
     int initialExplosionY;
+    int ammuSingleShot;
 
     Sound shotSound;
     Sound explosionSound;
@@ -53,6 +52,10 @@ public class GameScreen implements Screen {
         spaceShipImage = new Texture("spaceship.png");
         shotImage = new Texture("shot.png");
         asteroidImage = new Texture("asteroid.png");
+        explosionImage = new Texture("explosion.png");
+
+        shotSound = Gdx.audio.newSound(Gdx.files.internal("shotSound.wav"));
+        explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosionSound.wav"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 600, 800);
@@ -65,6 +68,7 @@ public class GameScreen implements Screen {
 
         spaceShipSpeed = 220;
         asteroidSpeed = 200;
+        ammuSingleShot = 3;
 
         singleShots = new Array<Rectangle>();
         asteroids = new Array<Rectangle>();
@@ -72,15 +76,10 @@ public class GameScreen implements Screen {
         initialExplosionX = 650;
         initialExplosionY = 850;
 
-        explosionImage = new Texture("explosion.png");
         explosionAnimation = TextureRegion.split(explosionImage,96,96);
         explosionSprite = new Sprite(explosionAnimation[0][0]);
         explosionSprite.setY(initialExplosionY);
         explosionSprite.setX(initialExplosionX);
-
-        shotSound = Gdx.audio.newSound(Gdx.files.internal("shotSound.wav"));
-
-        explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosionSound.wav"));
 
         spawnAsteroid();
     }
@@ -93,7 +92,14 @@ public class GameScreen implements Screen {
         singleShot.y = spaceShip.y + singleShot.height*4;
         singleShots.add(singleShot);
         lastFiredTime = TimeUtils.nanoTime();
-        shotSound.play();
+        shotSound.play(0.2f);
+    }
+
+    private int reloadSingleFire(int ammunition){
+
+        ammunition++;
+
+        return ammunition;
     }
 
     private void spawnAsteroid(){
@@ -108,7 +114,6 @@ public class GameScreen implements Screen {
 
     private void createExplosion(Rectangle asteroid){
 
-        //TODO: SYNCHRONIZE SOUNDS
         explosionSound.play();
 
         explosionSprite.setX(asteroid.x);
@@ -167,7 +172,11 @@ public class GameScreen implements Screen {
          *
          */
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && TimeUtils.nanoTime() - lastFiredTime > 200000000){
-            spaceShipSingleFire();
+            if(ammuSingleShot > 0){
+                ammuSingleShot--;
+                ammuSingleShot = reloadSingleFire(ammuSingleShot);
+                spaceShipSingleFire();
+            }
         }
         Iterator<Rectangle> singleShotIterator = singleShots.iterator();
         while(singleShotIterator.hasNext()){
@@ -211,8 +220,8 @@ public class GameScreen implements Screen {
         if(spaceShip.x > 600 - spaceShip.width){
             spaceShip.x = 600 - spaceShip.width;
         }
-        if(spaceShip.y < 0){
-            spaceShip.y = 0;
+        if(spaceShip.y < 100){
+            spaceShip.y = 100;
         }
         if(spaceShip.y > 800 - spaceShip.height){
             spaceShip.y = 800 - spaceShip.height;
@@ -233,6 +242,8 @@ public class GameScreen implements Screen {
             game.batch.draw(asteroidImage, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
         }
         game.batch.draw(explosionSprite, explosionSprite.getX(), explosionSprite.getY(), explosionSprite.getWidth(), explosionSprite.getHeight());
+
+        game.font.draw(game.batch, "Ammunition   " + ammuSingleShot, 50, 100);
 
         game.batch.end();
 
