@@ -26,14 +26,9 @@ public class GameScreen implements Screen {
     Texture spaceShipImage;
     Texture shotImage;
     Texture asteroidImage;
-
     Texture explosionImage;
     TextureRegion[][] explosionAnimation;
     Sprite explosionSprite;
-    int frame;
-    int initialExplosionX;
-    int initialExplosionY;
-
     Rectangle spaceShip;
 
     OrthographicCamera camera;
@@ -42,6 +37,9 @@ public class GameScreen implements Screen {
     long lastAsteroidSpawnTime;
     int spaceShipSpeed;
     int asteroidSpeed;
+    int frame;
+    int initialExplosionX;
+    int initialExplosionY;
 
     Sound shotSound;
     Music explosionSound;
@@ -70,22 +68,21 @@ public class GameScreen implements Screen {
 
         singleShots = new Array<Rectangle>();
         asteroids = new Array<Rectangle>();
-        spawnAsteroid();
-
-        //TODO: CREATE AN EXPLOSION ARRAY
-        explosionImage = new Texture("explosion.png");
-        explosionAnimation = TextureRegion.split(explosionImage,96,96);
-        explosionSprite = new Sprite(explosionAnimation[0][0]);
 
         initialExplosionX = 650;
         initialExplosionY = 850;
 
-        explosionSprite.setX(initialExplosionX);
+        explosionImage = new Texture("explosion.png");
+        explosionAnimation = TextureRegion.split(explosionImage,96,96);
+        explosionSprite = new Sprite(explosionAnimation[0][0]);
         explosionSprite.setY(initialExplosionY);
+        explosionSprite.setX(initialExplosionX);
 
         shotSound = Gdx.audio.newSound(Gdx.files.internal("shotSound.wav"));
+
         explosionSound = Gdx.audio.newMusic(Gdx.files.internal("explosionSound.wav"));
 
+        spawnAsteroid();
     }
 
     private void spaceShipSingleFire(){
@@ -107,6 +104,28 @@ public class GameScreen implements Screen {
         asteroid.y = 800;
         asteroids.add(asteroid);
         lastAsteroidSpawnTime = TimeUtils.nanoTime();
+    }
+
+    private void createExplosion(Rectangle asteroid){
+
+        //TODO: SYNCHRONIZE SOUNDS
+        explosionSound.play();
+        explosionSprite.setX(asteroid.x);
+        explosionSprite.setY(asteroid.y);
+
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                frame++;
+                if(frame > 7){
+                    frame = 0;
+                    explosionSprite.setY(initialExplosionY);
+                    explosionSprite.setX(initialExplosionX);
+                }
+                explosionSprite.setRegion(explosionAnimation[0][frame]);
+            }
+        }, 0, 1/20f, 7);
+
     }
 
     @Override
@@ -161,25 +180,7 @@ public class GameScreen implements Screen {
             while(asteroidShot.hasNext()){
                 Rectangle asteroid = asteroidShot.next();
                 if(asteroid.overlaps(singleShot)){
-
-                    //TODO: SYNCHRONIZE SOUNDS
-                    explosionSound.play();
-                    explosionSprite.setX(asteroid.x);
-                    explosionSprite.setY(asteroid.y);
-
-                    Timer.schedule(new Timer.Task() {
-                        @Override
-                        public void run() {
-                            frame++;
-                            if(frame > 7){
-                                frame = 0;
-                                explosionSprite.setY(initialExplosionY);
-                                explosionSprite.setX(initialExplosionX);
-                            }
-                            explosionSprite.setRegion(explosionAnimation[0][frame]);
-                        }
-                    }, 0, 1/20f, 7);
-
+                    createExplosion(asteroid);
                     asteroidShot.remove();
                     singleShotIterator.remove();
                 }
@@ -224,14 +225,12 @@ public class GameScreen implements Screen {
         game.batch.begin();
 
         game.batch.draw(spaceShipImage, spaceShip.x, spaceShip.y, spaceShip.width, spaceShip.height);
-
         for(Rectangle shot : singleShots){
             game.batch.draw(shotImage, shot.x, shot.y, shot.width, shot.height);
         }
         for(Rectangle asteroid : asteroids){
             game.batch.draw(asteroidImage, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
         }
-
         game.batch.draw(explosionSprite, explosionSprite.getX(), explosionSprite.getY(), explosionSprite.getWidth(), explosionSprite.getHeight());
 
         game.batch.end();
