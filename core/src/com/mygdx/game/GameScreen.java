@@ -39,6 +39,7 @@ public class GameScreen implements Screen {
     int initialExplosionX;
     int initialExplosionY;
     int ammuSingleShot;
+    int score;
 
     Sound shotSound;
     Sound explosionSound;
@@ -69,6 +70,7 @@ public class GameScreen implements Screen {
         spaceShipSpeed = 220;
         asteroidSpeed = 200;
         ammuSingleShot = 3;
+        score = 0;
 
         singleShots = new Array<Rectangle>();
         asteroids = new Array<Rectangle>();
@@ -190,6 +192,7 @@ public class GameScreen implements Screen {
             while(asteroidShot.hasNext()){
                 Rectangle asteroid = asteroidShot.next();
                 if(asteroid.overlaps(singleShot)){
+                    score++;
                     createExplosion(asteroid);
                     asteroidShot.remove();
                     singleShotIterator.remove();
@@ -244,6 +247,7 @@ public class GameScreen implements Screen {
         game.batch.draw(explosionSprite, explosionSprite.getX(), explosionSprite.getY(), explosionSprite.getWidth(), explosionSprite.getHeight());
 
         game.font.draw(game.batch, "Ammunition   " + ammuSingleShot, 50, 100);
+        game.font.draw(game.batch, "Score  " + score, 200, 100);
 
         game.batch.end();
 
