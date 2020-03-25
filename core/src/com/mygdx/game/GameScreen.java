@@ -15,7 +15,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 
+import java.sql.Time;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 public class GameScreen implements Screen {
 
@@ -33,6 +35,7 @@ public class GameScreen implements Screen {
 
     long lastFiredTime;
     long lastAsteroidSpawnTime;
+
     int spaceShipSpeed;
     int asteroidSpeed;
     int frame;
@@ -40,6 +43,7 @@ public class GameScreen implements Screen {
     int initialExplosionY;
     int ammuSingleShot;
     int score;
+    int lifes;
 
     Sound shotSound;
     Sound explosionSound;
@@ -71,6 +75,7 @@ public class GameScreen implements Screen {
         asteroidSpeed = 200;
         ammuSingleShot = 3;
         score = 0;
+        lifes = 3;
 
         singleShots = new Array<Rectangle>();
         asteroids = new Array<Rectangle>();
@@ -98,9 +103,7 @@ public class GameScreen implements Screen {
     }
 
     private int reloadSingleFire(int ammunition){
-
         ammunition++;
-
         return ammunition;
     }
 
@@ -148,7 +151,7 @@ public class GameScreen implements Screen {
 
         /**
          *
-         * Asteroid spawn
+         * Asteroid spawn and collision handling
          *
          */
         if(TimeUtils.nanoTime() - lastAsteroidSpawnTime > 1000000000){
@@ -156,6 +159,7 @@ public class GameScreen implements Screen {
         }
         Iterator<Rectangle> asteroidIterator = asteroids.iterator();
         while(asteroidIterator.hasNext()){
+
             Rectangle asteroid = asteroidIterator.next();
             asteroid.y -= asteroidSpeed * Gdx.graphics.getDeltaTime();
 
@@ -163,8 +167,15 @@ public class GameScreen implements Screen {
                 asteroidIterator.remove();
             }
             if(asteroid.overlaps(spaceShip)){
-                game.setScreen(new GameOverScreen(game));
-                dispose();
+                if(lifes == 1){
+                    game.setScreen(new GameOverScreen(game));
+                    dispose();
+                }
+                else{
+                    lifes--;
+                    createExplosion(asteroid);
+                    asteroidIterator.remove();
+                }
             }
         }
 
@@ -248,6 +259,7 @@ public class GameScreen implements Screen {
 
         game.font.draw(game.batch, "Ammunition   " + ammuSingleShot, 50, 100);
         game.font.draw(game.batch, "Score  " + score, 200, 100);
+        game.font.draw(game.batch, "Lifes  " + lifes, 300, 100);
 
         game.batch.end();
 
