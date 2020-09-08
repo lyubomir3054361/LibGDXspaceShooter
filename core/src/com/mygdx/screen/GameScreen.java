@@ -1,25 +1,18 @@
 package com.mygdx.screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.Timer;
+import com.mygdx.actionlistener.AsteroidListener;
+import com.mygdx.actionlistener.ShipFireListener;
+import com.mygdx.actionlistener.ShipMovementListener;
 import com.mygdx.game.SpaceBattle;
 import com.mygdx.model.Asteroid;
 import com.mygdx.model.Explosion;
 import com.mygdx.model.Shot;
 import com.mygdx.model.SpaceShip;
-
-import java.util.Iterator;
 
 
 public class GameScreen implements Screen {
@@ -30,6 +23,9 @@ public class GameScreen implements Screen {
     private Asteroid asteroid;
     private Shot shot;
     private Explosion explosion;
+    private ShipMovementListener shipMovementListener;
+    private ShipFireListener shipFireListener;
+    private AsteroidListener asteroidListener;
     private int score;
 
     public GameScreen(final SpaceBattle game){
@@ -38,6 +34,9 @@ public class GameScreen implements Screen {
         asteroid  = new Asteroid();
         shot = new Shot();
         explosion = new Explosion();
+        shipMovementListener = new ShipMovementListener();
+        shipFireListener = new ShipFireListener();
+        asteroidListener = new AsteroidListener();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 600, 800);
         score = 0;
@@ -52,103 +51,11 @@ public class GameScreen implements Screen {
 
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
+        asteroidListener.checkForInputs(spaceShip, asteroid, explosion, game, this);
+        shipFireListener.checkForInputs(spaceShip, asteroid, shot, explosion, score);
+        shipMovementListener.checkForInputs(spaceShip);
 
-
-        /**
-         *
-         * Asteroid spawn and collision handling
-         *
-         */
-        if(TimeUtils.nanoTime() - asteroid.getLastAsteroidSpawnTime() > 1000000000){
-            asteroid.spawnAsteroid(asteroid.getAsteroids());
-        }
-        Iterator<Rectangle> asteroidIterator = asteroid.getAsteroids().iterator();
-        while(asteroidIterator.hasNext()){
-
-            Rectangle iterator = asteroidIterator.next();
-            iterator.y -= asteroid.getAsteroidSpeed() * Gdx.graphics.getDeltaTime();
-
-            if(iterator.y + iterator.height < 0){
-                asteroidIterator.remove();
-            }
-            if(iterator.overlaps(spaceShip.getSpaceShipRectangle())){
-                if(spaceShip.getLifes() == 1){
-                    game.setScreen(new GameOverScreen(game));
-                    dispose();
-                }
-                else{
-                    spaceShip.setLifes(spaceShip.getLifes() - 1);
-                    explosion.createExplosion(iterator);
-                    asteroidIterator.remove();
-                }
-            }
-        }
-
-        /**
-         *
-         * Fire
-         *
-         */
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && TimeUtils.nanoTime() - spaceShip.getLastFiredTime() > 200000000){
-            spaceShip.spaceShipSingleFire(shot);
-        }
-        Iterator<Rectangle> singleShotIterator = spaceShip.getSingleShots().iterator();
-        while(singleShotIterator.hasNext()){
-            Rectangle singleShot = singleShotIterator.next();
-            singleShot.y += 800 * Gdx.graphics.getDeltaTime();
-
-            if(singleShot.y > 800){
-                singleShotIterator.remove();
-            }
-            Iterator<Rectangle> asteroidShot = asteroid.getAsteroids().iterator();
-            while(asteroidShot.hasNext()){
-                Rectangle asteroid = asteroidShot.next();
-                if(asteroid.overlaps(singleShot)){
-                    score++;
-                    explosion.createExplosion(asteroid);
-                    asteroidShot.remove();
-                    singleShotIterator.remove();
-                }
-            }
-        }
-
-        /**
-         *
-         * Ship movement
-         *
-         */
-        if(Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)){
-            spaceShip.getSpaceShipRectangle().y += spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-            spaceShip.getSpaceShipRectangle().y -= spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            spaceShip.getSpaceShipRectangle().x -= spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            spaceShip.getSpaceShipRectangle().x += spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
-        }
-        if(spaceShip.getSpaceShipRectangle().x < 0){
-            spaceShip.getSpaceShipRectangle().x = 0;
-        }
-        if(spaceShip.getSpaceShipRectangle().x > 600 - spaceShip.getSpaceShipRectangle().width){
-            spaceShip.getSpaceShipRectangle().x = 600 - spaceShip.getSpaceShipRectangle().width;
-        }
-        if(spaceShip.getSpaceShipRectangle().y < 100){
-            spaceShip.getSpaceShipRectangle().y = 100;
-        }
-        if(spaceShip.getSpaceShipRectangle().y > 800 - spaceShip.getSpaceShipRectangle().height){
-            spaceShip.getSpaceShipRectangle().y = 800 - spaceShip.getSpaceShipRectangle().height;
-        }
-
-        /**
-         *
-         * Drawing objects
-         *
-         */
         game.batch.begin();
-
         game.batch.draw(spaceShip.getSpaceShipImage(), spaceShip.getSpaceShipRectangle().x, spaceShip.getSpaceShipRectangle().y, spaceShip.getSpaceShipRectangle().width, spaceShip.getSpaceShipRectangle().height);
         for(Rectangle s : spaceShip.getSingleShots()){
             game.batch.draw(shot.getShotImage(), s.x, s.y, s.width, s.height);
@@ -158,9 +65,9 @@ public class GameScreen implements Screen {
         }
         game.batch.draw(explosion.getExplosionSprite(), explosion.getExplosionSprite().getX(), explosion.getExplosionSprite().getY(), explosion.getExplosionSprite().getWidth(), explosion.getExplosionSprite().getHeight());
 
-        game.font.draw(game.batch, "Ammunition   " + spaceShip.getAmmuSingleShot(), 50, 100);
+        game.font.draw(game.batch, "Ammunition   " + spaceShip.getAmuSingleShot(), 50, 100);
         game.font.draw(game.batch, "Score  " + score, 200, 100);
-        game.font.draw(game.batch, "Lifes  " + spaceShip.getLifes(), 300, 100);
+        game.font.draw(game.batch, "Lifes  " + spaceShip.getLifesLeft(), 300, 100);
 
         game.batch.end();
 

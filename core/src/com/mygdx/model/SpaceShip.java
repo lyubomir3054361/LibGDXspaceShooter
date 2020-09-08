@@ -10,9 +10,9 @@ public class SpaceShip {
     private Texture spaceShipImage;
     private Rectangle spaceShipRectangle;
     private int spaceShipSpeed;
-    private int lifes;
+    private int lifesLeft;
     private Array<Rectangle> singleShots;
-    private int ammuSingleShot;
+    private int amuSingleShot;
     private long lastFiredTime;
 
 
@@ -24,9 +24,9 @@ public class SpaceShip {
         spaceShipRectangle.width = 64;
         spaceShipRectangle.height = 64;
         spaceShipSpeed = 220;
-        lifes = 3;
+        lifesLeft = 3;
         singleShots = new Array<>();
-        ammuSingleShot = 3;
+        amuSingleShot = 3;
     }
 
     public void spaceShipSingleFire(Shot shot){
@@ -64,12 +64,12 @@ public class SpaceShip {
         this.spaceShipSpeed = spaceShipSpeed;
     }
 
-    public int getLifes() {
-        return lifes;
+    public int getLifesLeft() {
+        return lifesLeft;
     }
 
-    public void setLifes(int lifes) {
-        this.lifes = lifes;
+    public void setLifesLeft(int lifesLeft) {
+        this.lifesLeft = lifesLeft;
     }
 
     public Array<Rectangle> getSingleShots() {
@@ -80,12 +80,12 @@ public class SpaceShip {
         this.singleShots = singleShots;
     }
 
-    public int getAmmuSingleShot() {
-        return ammuSingleShot;
+    public int getAmuSingleShot() {
+        return amuSingleShot;
     }
 
-    public void setAmmuSingleShot(int ammuSingleShot) {
-        this.ammuSingleShot = ammuSingleShot;
+    public void setAmuSingleShot(int amuSingleShot) {
+        this.amuSingleShot = amuSingleShot;
     }
 
     public long getLastFiredTime() {
