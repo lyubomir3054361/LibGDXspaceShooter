@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -14,42 +14,42 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
+import com.mygdx.game.SpaceBattle;
 
-import java.sql.Time;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
+
 
 public class GameScreen implements Screen {
 
     final SpaceBattle game;
 
-    Texture spaceShipImage;
-    Texture shotImage;
-    Texture asteroidImage;
-    Texture explosionImage;
-    TextureRegion[][] explosionAnimation;
-    Sprite explosionSprite;
-    Rectangle spaceShip;
+    private Texture spaceShipImage;
+    private Texture shotImage;
+    private Texture asteroidImage;
+    private Texture explosionImage;
+    private TextureRegion[][] explosionAnimation;
+    private Sprite explosionSprite;
+    private Rectangle spaceShip;
 
-    OrthographicCamera camera;
+    private OrthographicCamera camera;
 
-    long lastFiredTime;
-    long lastAsteroidSpawnTime;
+    private long lastFiredTime;
+    private long lastAsteroidSpawnTime;
 
-    int spaceShipSpeed;
-    int asteroidSpeed;
-    int frame;
-    int initialExplosionX;
-    int initialExplosionY;
-    int ammuSingleShot;
-    int score;
-    int lifes;
+    private int spaceShipSpeed;
+    private int asteroidSpeed;
+    private int frame;
+    private int initialExplosionX;
+    private int initialExplosionY;
+    private int ammuSingleShot;
+    private int score;
+    private int lifes;
 
-    Sound shotSound;
-    Sound explosionSound;
+    private Sound shotSound;
+    private Sound explosionSound;
 
-    Array<Rectangle> singleShots;
-    Array<Rectangle> asteroids;
+    private Array<Rectangle> singleShots;
+    private Array<Rectangle> asteroids;
 
     public GameScreen(final SpaceBattle game){
         this.game = game;
