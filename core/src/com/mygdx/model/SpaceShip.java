@@ -12,6 +12,7 @@ public class SpaceShip {
     private int spaceShipSpeed;
     private int lifes;
     private Array<Rectangle> singleShots;
+    private int ammuSingleShot;
 
 
     public SpaceShip(){
@@ -24,6 +25,7 @@ public class SpaceShip {
         spaceShipSpeed = 220;
         lifes = 3;
         singleShots = new Array<>();
+        ammuSingleShot = 3;
     }
 
 
@@ -77,5 +79,13 @@ public class SpaceShip {
 
     public void setSingleShots(Array<Rectangle> singleShots) {
         this.singleShots = singleShots;
+    }
+
+    public int getAmmuSingleShot() {
+        return ammuSingleShot;
+    }
+
+    public void setAmmuSingleShot(int ammuSingleShot) {
+        this.ammuSingleShot = ammuSingleShot;
     }
 }

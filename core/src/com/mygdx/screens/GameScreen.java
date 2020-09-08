@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.SpaceBattle;
+import com.mygdx.model.Asteroid;
 import com.mygdx.model.SpaceShip;
 
 import java.util.Iterator;
@@ -25,7 +26,6 @@ public class GameScreen implements Screen {
     final SpaceBattle game;
 
     private Texture shotImage;
-    private Texture asteroidImage;
     private Texture explosionImage;
     private TextureRegion[][] explosionAnimation;
     private Sprite explosionSprite;
@@ -33,31 +33,26 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
 
     private long lastFiredTime;
-    private long lastAsteroidSpawnTime;
 
     private SpaceShip spaceShip;
+    private Asteroid asteroid;
 
-    private int asteroidSpeed;
     private int frame;
     private int initialExplosionX;
     private int initialExplosionY;
-    private int ammuSingleShot;
     private int score;
-    private int lifes;
 
     private Sound shotSound;
     private Sound explosionSound;
 
     private Array<Rectangle> singleShots;
-    private Array<Rectangle> asteroids;
 
     public GameScreen(final SpaceBattle game){
         this.game = game;
-
         spaceShip = new SpaceShip();
+        asteroid  = new Asteroid();
 
         shotImage = new Texture("shot.png");
-        asteroidImage = new Texture("asteroid.png");
         explosionImage = new Texture("explosion.png");
 
         shotSound = Gdx.audio.newSound(Gdx.files.internal("shotSound.wav"));
@@ -66,13 +61,9 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 600, 800);
 
-        asteroidSpeed = 200;
-        ammuSingleShot = 3;
         score = 0;
-        lifes = 3;
 
-        singleShots = new Array<Rectangle>();
-        asteroids = new Array<Rectangle>();
+        singleShots = new Array<>();
 
         initialExplosionX = 650;
         initialExplosionY = 850;
@@ -82,7 +73,7 @@ public class GameScreen implements Screen {
         explosionSprite.setY(initialExplosionY);
         explosionSprite.setX(initialExplosionX);
 
-        spawnAsteroid();
+        asteroid.spawnAsteroid(asteroid.getAsteroids());
     }
 
     private void spaceShipSingleFire(){
@@ -96,25 +87,9 @@ public class GameScreen implements Screen {
         shotSound.play(0.2f);
     }
 
-    private int reloadSingleFire(int ammunition){
-        ammunition++;
-        return ammunition;
-    }
-
-    private void spawnAsteroid(){
-        Rectangle asteroid = new Rectangle();
-        asteroid.width = MathUtils.random(48, 96);
-        asteroid.height = MathUtils.random(48,96);
-        asteroid.x = MathUtils.random(0, 600 - asteroid.width);
-        asteroid.y = 800;
-        asteroids.add(asteroid);
-        lastAsteroidSpawnTime = TimeUtils.nanoTime();
-    }
 
     private void createExplosion(Rectangle asteroid){
-
         explosionSound.play();
-
         explosionSprite.setX(asteroid.x);
         explosionSprite.setY(asteroid.y);
 
@@ -148,26 +123,26 @@ public class GameScreen implements Screen {
          * Asteroid spawn and collision handling
          *
          */
-        if(TimeUtils.nanoTime() - lastAsteroidSpawnTime > 1000000000){
-            spawnAsteroid();
+        if(TimeUtils.nanoTime() - asteroid.getLastAsteroidSpawnTime() > 1000000000){
+            asteroid.spawnAsteroid(asteroid.getAsteroids());
         }
-        Iterator<Rectangle> asteroidIterator = asteroids.iterator();
+        Iterator<Rectangle> asteroidIterator = asteroid.getAsteroids().iterator();
         while(asteroidIterator.hasNext()){
 
-            Rectangle asteroid = asteroidIterator.next();
-            asteroid.y -= asteroidSpeed * Gdx.graphics.getDeltaTime();
+            Rectangle iterator = asteroidIterator.next();
+            iterator.y -= asteroid.getAsteroidSpeed() * Gdx.graphics.getDeltaTime();
 
-            if(asteroid.y + asteroid.height < 0){
+            if(iterator.y + iterator.height < 0){
                 asteroidIterator.remove();
             }
-            if(asteroid.overlaps(spaceShip.getSpaceShipRectangle())){
-                if(lifes == 1){
+            if(iterator.overlaps(spaceShip.getSpaceShipRectangle())){
+                if(spaceShip.getLifes() == 1){
                     game.setScreen(new GameOverScreen(game));
                     dispose();
                 }
                 else{
-                    lifes--;
-                    createExplosion(asteroid);
+                    spaceShip.setLifes(spaceShip.getLifes() - 1);
+                    createExplosion(iterator);
                     asteroidIterator.remove();
                 }
             }
@@ -179,11 +154,7 @@ public class GameScreen implements Screen {
          *
          */
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && TimeUtils.nanoTime() - lastFiredTime > 200000000){
-            if(ammuSingleShot > 0){
-                ammuSingleShot--;
-                ammuSingleShot = reloadSingleFire(ammuSingleShot);
-                spaceShipSingleFire();
-            }
+            spaceShipSingleFire();
         }
         Iterator<Rectangle> singleShotIterator = singleShots.iterator();
         while(singleShotIterator.hasNext()){
@@ -193,7 +164,7 @@ public class GameScreen implements Screen {
             if(singleShot.y > 800){
                 singleShotIterator.remove();
             }
-            Iterator<Rectangle> asteroidShot = asteroids.iterator();
+            Iterator<Rectangle> asteroidShot = asteroid.getAsteroids().iterator();
             while(asteroidShot.hasNext()){
                 Rectangle asteroid = asteroidShot.next();
                 if(asteroid.overlaps(singleShot)){
@@ -246,14 +217,14 @@ public class GameScreen implements Screen {
         for(Rectangle shot : singleShots){
             game.batch.draw(shotImage, shot.x, shot.y, shot.width, shot.height);
         }
-        for(Rectangle asteroid : asteroids){
-            game.batch.draw(asteroidImage, asteroid.x, asteroid.y, asteroid.width, asteroid.height);
+        for(Rectangle a : asteroid.getAsteroids()){
+            game.batch.draw(asteroid.getAsteroidImage(), a.x, a.y, a.width, a.height);
         }
         game.batch.draw(explosionSprite, explosionSprite.getX(), explosionSprite.getY(), explosionSprite.getWidth(), explosionSprite.getHeight());
 
-        game.font.draw(game.batch, "Ammunition   " + ammuSingleShot, 50, 100);
+        game.font.draw(game.batch, "Ammunition   " + spaceShip.getAmmuSingleShot(), 50, 100);
         game.font.draw(game.batch, "Score  " + score, 200, 100);
-        game.font.draw(game.batch, "Lifes  " + lifes, 300, 100);
+        game.font.draw(game.batch, "Lifes  " + spaceShip.getLifes(), 300, 100);
 
         game.batch.end();
 
@@ -288,7 +259,7 @@ public class GameScreen implements Screen {
     public void dispose() {
         shotImage.dispose();
         spaceShip.getSpaceShipImage().dispose();
-        asteroidImage.dispose();
+        asteroid.getAsteroidImage().dispose();
         explosionImage.dispose();
         shotSound.dispose();
         explosionSound.dispose();
