@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.SpaceBattle;
 import com.mygdx.model.Asteroid;
+import com.mygdx.model.Explosion;
 import com.mygdx.model.Shot;
 import com.mygdx.model.SpaceShip;
 
@@ -24,69 +25,23 @@ import java.util.Iterator;
 public class GameScreen implements Screen {
 
     final SpaceBattle game;
-
-    private Texture explosionImage;
-    private TextureRegion[][] explosionAnimation;
-    private Sprite explosionSprite;
-
     private OrthographicCamera camera;
-
     private SpaceShip spaceShip;
     private Asteroid asteroid;
     private Shot shot;
-
-    private int frame;
-    private int initialExplosionX;
-    private int initialExplosionY;
+    private Explosion explosion;
     private int score;
-
-    private Sound explosionSound;
-
-
 
     public GameScreen(final SpaceBattle game){
         this.game = game;
         spaceShip = new SpaceShip();
         asteroid  = new Asteroid();
         shot = new Shot();
-
-        explosionImage = new Texture("explosion.png");
-        explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosionSound.wav"));
-
+        explosion = new Explosion();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 600, 800);
-
         score = 0;
-
-        initialExplosionX = 650;
-        initialExplosionY = 850;
-
-        explosionAnimation = TextureRegion.split(explosionImage,96,96);
-        explosionSprite = new Sprite(explosionAnimation[0][0]);
-        explosionSprite.setY(initialExplosionY);
-        explosionSprite.setX(initialExplosionX);
-
         asteroid.spawnAsteroid(asteroid.getAsteroids());
-    }
-
-    private void createExplosion(Rectangle asteroid){
-        explosionSound.play();
-        explosionSprite.setX(asteroid.x);
-        explosionSprite.setY(asteroid.y);
-
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                frame++;
-                if(frame > 7){
-                    frame = 0;
-                    explosionSprite.setY(initialExplosionY);
-                    explosionSprite.setX(initialExplosionX);
-                }
-                explosionSprite.setRegion(explosionAnimation[0][frame]);
-            }
-        }, 0, 1/20f, 7);
-
     }
 
     @Override
@@ -123,7 +78,7 @@ public class GameScreen implements Screen {
                 }
                 else{
                     spaceShip.setLifes(spaceShip.getLifes() - 1);
-                    createExplosion(iterator);
+                    explosion.createExplosion(iterator);
                     asteroidIterator.remove();
                 }
             }
@@ -150,7 +105,7 @@ public class GameScreen implements Screen {
                 Rectangle asteroid = asteroidShot.next();
                 if(asteroid.overlaps(singleShot)){
                     score++;
-                    createExplosion(asteroid);
+                    explosion.createExplosion(asteroid);
                     asteroidShot.remove();
                     singleShotIterator.remove();
                 }
@@ -201,7 +156,7 @@ public class GameScreen implements Screen {
         for(Rectangle a : asteroid.getAsteroids()){
             game.batch.draw(asteroid.getAsteroidImage(), a.x, a.y, a.width, a.height);
         }
-        game.batch.draw(explosionSprite, explosionSprite.getX(), explosionSprite.getY(), explosionSprite.getWidth(), explosionSprite.getHeight());
+        game.batch.draw(explosion.getExplosionSprite(), explosion.getExplosionSprite().getX(), explosion.getExplosionSprite().getY(), explosion.getExplosionSprite().getWidth(), explosion.getExplosionSprite().getHeight());
 
         game.font.draw(game.batch, "Ammunition   " + spaceShip.getAmmuSingleShot(), 50, 100);
         game.font.draw(game.batch, "Score  " + score, 200, 100);
@@ -241,9 +196,9 @@ public class GameScreen implements Screen {
         shot.getShotImage().dispose();
         spaceShip.getSpaceShipImage().dispose();
         asteroid.getAsteroidImage().dispose();
-        explosionImage.dispose();
+        explosion.getExplosionImage().dispose();
         shot.getShotSound().dispose();
-        explosionSound.dispose();
+        explosion.getExplosionSound().dispose();
     }
 
 }
