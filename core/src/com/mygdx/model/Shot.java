@@ -1,7 +1,4 @@
 package com.mygdx.model;
 
-public class Asteroid {
-
-
-
+public class Shot {
 }

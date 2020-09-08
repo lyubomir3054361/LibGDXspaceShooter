@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.SpaceBattle;
+import com.mygdx.model.SpaceShip;
 
 import java.util.Iterator;
 
@@ -23,20 +24,19 @@ public class GameScreen implements Screen {
 
     final SpaceBattle game;
 
-    private Texture spaceShipImage;
     private Texture shotImage;
     private Texture asteroidImage;
     private Texture explosionImage;
     private TextureRegion[][] explosionAnimation;
     private Sprite explosionSprite;
-    private Rectangle spaceShip;
 
     private OrthographicCamera camera;
 
     private long lastFiredTime;
     private long lastAsteroidSpawnTime;
 
-    private int spaceShipSpeed;
+    private SpaceShip spaceShip;
+
     private int asteroidSpeed;
     private int frame;
     private int initialExplosionX;
@@ -54,7 +54,8 @@ public class GameScreen implements Screen {
     public GameScreen(final SpaceBattle game){
         this.game = game;
 
-        spaceShipImage = new Texture("spaceship.png");
+        spaceShip = new SpaceShip();
+
         shotImage = new Texture("shot.png");
         asteroidImage = new Texture("asteroid.png");
         explosionImage = new Texture("explosion.png");
@@ -65,13 +66,6 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 600, 800);
 
-        spaceShip = new Rectangle();
-        spaceShip.x = 300 - 64;
-        spaceShip.y = 200;
-        spaceShip.width = 64;
-        spaceShip.height = 64;
-
-        spaceShipSpeed = 220;
         asteroidSpeed = 200;
         ammuSingleShot = 3;
         score = 0;
@@ -95,8 +89,8 @@ public class GameScreen implements Screen {
         Rectangle singleShot = new Rectangle();
         singleShot.width = 16;
         singleShot.height = 16;
-        singleShot.x = spaceShip.x + spaceShip.width/2 - singleShot.width/2;
-        singleShot.y = spaceShip.y + singleShot.height*4;
+        singleShot.x = spaceShip.getSpaceShipRectangle().x + spaceShip.getSpaceShipRectangle().width/2 - singleShot.width/2;
+        singleShot.y = spaceShip.getSpaceShipRectangle().y + singleShot.height*4;
         singleShots.add(singleShot);
         lastFiredTime = TimeUtils.nanoTime();
         shotSound.play(0.2f);
@@ -166,7 +160,7 @@ public class GameScreen implements Screen {
             if(asteroid.y + asteroid.height < 0){
                 asteroidIterator.remove();
             }
-            if(asteroid.overlaps(spaceShip)){
+            if(asteroid.overlaps(spaceShip.getSpaceShipRectangle())){
                 if(lifes == 1){
                     game.setScreen(new GameOverScreen(game));
                     dispose();
@@ -217,28 +211,28 @@ public class GameScreen implements Screen {
          *
          */
         if(Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)){
-            spaceShip.y += spaceShipSpeed * Gdx.graphics.getDeltaTime();
+            spaceShip.getSpaceShipRectangle().y += spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-            spaceShip.y -= spaceShipSpeed * Gdx.graphics.getDeltaTime();
+            spaceShip.getSpaceShipRectangle().y -= spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            spaceShip.x -= spaceShipSpeed * Gdx.graphics.getDeltaTime();
+            spaceShip.getSpaceShipRectangle().x -= spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            spaceShip.x += spaceShipSpeed * Gdx.graphics.getDeltaTime();
+            spaceShip.getSpaceShipRectangle().x += spaceShip.getSpaceShipSpeed() * Gdx.graphics.getDeltaTime();
         }
-        if(spaceShip.x < 0){
-            spaceShip.x = 0;
+        if(spaceShip.getSpaceShipRectangle().x < 0){
+            spaceShip.getSpaceShipRectangle().x = 0;
         }
-        if(spaceShip.x > 600 - spaceShip.width){
-            spaceShip.x = 600 - spaceShip.width;
+        if(spaceShip.getSpaceShipRectangle().x > 600 - spaceShip.getSpaceShipRectangle().width){
+            spaceShip.getSpaceShipRectangle().x = 600 - spaceShip.getSpaceShipRectangle().width;
         }
-        if(spaceShip.y < 100){
-            spaceShip.y = 100;
+        if(spaceShip.getSpaceShipRectangle().y < 100){
+            spaceShip.getSpaceShipRectangle().y = 100;
         }
-        if(spaceShip.y > 800 - spaceShip.height){
-            spaceShip.y = 800 - spaceShip.height;
+        if(spaceShip.getSpaceShipRectangle().y > 800 - spaceShip.getSpaceShipRectangle().height){
+            spaceShip.getSpaceShipRectangle().y = 800 - spaceShip.getSpaceShipRectangle().height;
         }
 
         /**
@@ -248,7 +242,7 @@ public class GameScreen implements Screen {
          */
         game.batch.begin();
 
-        game.batch.draw(spaceShipImage, spaceShip.x, spaceShip.y, spaceShip.width, spaceShip.height);
+        game.batch.draw(spaceShip.getSpaceShipImage(), spaceShip.getSpaceShipRectangle().x, spaceShip.getSpaceShipRectangle().y, spaceShip.getSpaceShipRectangle().width, spaceShip.getSpaceShipRectangle().height);
         for(Rectangle shot : singleShots){
             game.batch.draw(shotImage, shot.x, shot.y, shot.width, shot.height);
         }
@@ -293,7 +287,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         shotImage.dispose();
-        spaceShipImage.dispose();
+        spaceShip.getSpaceShipImage().dispose();
         asteroidImage.dispose();
         explosionImage.dispose();
         shotSound.dispose();
