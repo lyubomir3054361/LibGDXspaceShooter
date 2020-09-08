@@ -52,7 +52,7 @@ public class GameScreen implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         asteroidListener.checkForInputs(spaceShip, asteroid, explosion, game, this);
-        shipFireListener.checkForInputs(spaceShip, asteroid, shot, explosion, score);
+        shipFireListener.checkForInputs(spaceShip, asteroid, shot, explosion, this);
         shipMovementListener.checkForInputs(spaceShip);
 
         game.batch.begin();
@@ -108,4 +108,11 @@ public class GameScreen implements Screen {
         explosion.getExplosionSound().dispose();
     }
 
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
 }
