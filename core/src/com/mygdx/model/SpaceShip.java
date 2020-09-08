@@ -9,15 +9,15 @@ public class SpaceShip {
 
     private Texture spaceShipImage;
     private Rectangle spaceShipRectangle;
+    private Array<Rectangle> singleShots;
     private int spaceShipSpeed;
     private int lifesLeft;
-    private Array<Rectangle> singleShots;
     private int amuSingleShot;
     private long lastFiredTime;
 
 
     public SpaceShip(){
-        spaceShipImage = new Texture("spaceship.png");
+        spaceShipImage = new Texture("spaceship2.png");
         spaceShipRectangle = new Rectangle();
         spaceShipRectangle.x = 300 - 64;
         spaceShipRectangle.y = 200;

@@ -1,4 +1,4 @@
-package com.mygdx.actionlistener;
+package com.mygdx.actions;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
@@ -12,7 +12,7 @@ import com.mygdx.screen.GameScreen;
 
 import java.util.Iterator;
 
-public class AsteroidListener {
+public class AsteroidActionListener {
 
     public  void checkForInputs(SpaceShip spaceShip, Asteroid asteroid, Explosion explosion, SpaceBattle game, GameScreen gameScreen){
         if(TimeUtils.nanoTime() - asteroid.getLastAsteroidSpawnTime() > 1000000000){
