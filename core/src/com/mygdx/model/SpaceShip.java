@@ -13,6 +13,7 @@ public class SpaceShip {
     private int lifes;
     private Array<Rectangle> singleShots;
     private int ammuSingleShot;
+    private long lastFiredTime;
 
 
     public SpaceShip(){
@@ -28,17 +29,15 @@ public class SpaceShip {
         ammuSingleShot = 3;
     }
 
-
-
-    public void spaceShipSingleFire(){
+    public void spaceShipSingleFire(Shot shot){
         Rectangle singleShot = new Rectangle();
         singleShot.width = 16;
         singleShot.height = 16;
         singleShot.x = spaceShipRectangle.x + spaceShipRectangle.width/2 - singleShot.width/2;
         singleShot.y = spaceShipRectangle.y + singleShot.height*4;
         singleShots.add(singleShot);
-     //   lastFiredTime = TimeUtils.nanoTime();
-       // shotSound.play(0.2f);
+        lastFiredTime = TimeUtils.nanoTime();
+        shot.getShotSound().play(0.2f);
     }
 
     public Texture getSpaceShipImage() {
@@ -87,5 +86,13 @@ public class SpaceShip {
 
     public void setAmmuSingleShot(int ammuSingleShot) {
         this.ammuSingleShot = ammuSingleShot;
+    }
+
+    public long getLastFiredTime() {
+        return lastFiredTime;
+    }
+
+    public void setLastFiredTime(long lastFiredTime) {
+        this.lastFiredTime = lastFiredTime;
     }
 }

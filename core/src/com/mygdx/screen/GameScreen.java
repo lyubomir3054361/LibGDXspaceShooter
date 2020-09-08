@@ -1,4 +1,4 @@
-package com.mygdx.screens;
+package com.mygdx.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -9,13 +9,13 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.SpaceBattle;
 import com.mygdx.model.Asteroid;
+import com.mygdx.model.Shot;
 import com.mygdx.model.SpaceShip;
 
 import java.util.Iterator;
@@ -25,45 +25,38 @@ public class GameScreen implements Screen {
 
     final SpaceBattle game;
 
-    private Texture shotImage;
     private Texture explosionImage;
     private TextureRegion[][] explosionAnimation;
     private Sprite explosionSprite;
 
     private OrthographicCamera camera;
 
-    private long lastFiredTime;
-
     private SpaceShip spaceShip;
     private Asteroid asteroid;
+    private Shot shot;
 
     private int frame;
     private int initialExplosionX;
     private int initialExplosionY;
     private int score;
 
-    private Sound shotSound;
     private Sound explosionSound;
 
-    private Array<Rectangle> singleShots;
+
 
     public GameScreen(final SpaceBattle game){
         this.game = game;
         spaceShip = new SpaceShip();
         asteroid  = new Asteroid();
+        shot = new Shot();
 
-        shotImage = new Texture("shot.png");
         explosionImage = new Texture("explosion.png");
-
-        shotSound = Gdx.audio.newSound(Gdx.files.internal("shotSound.wav"));
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosionSound.wav"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 600, 800);
 
         score = 0;
-
-        singleShots = new Array<>();
 
         initialExplosionX = 650;
         initialExplosionY = 850;
@@ -75,18 +68,6 @@ public class GameScreen implements Screen {
 
         asteroid.spawnAsteroid(asteroid.getAsteroids());
     }
-
-    private void spaceShipSingleFire(){
-        Rectangle singleShot = new Rectangle();
-        singleShot.width = 16;
-        singleShot.height = 16;
-        singleShot.x = spaceShip.getSpaceShipRectangle().x + spaceShip.getSpaceShipRectangle().width/2 - singleShot.width/2;
-        singleShot.y = spaceShip.getSpaceShipRectangle().y + singleShot.height*4;
-        singleShots.add(singleShot);
-        lastFiredTime = TimeUtils.nanoTime();
-        shotSound.play(0.2f);
-    }
-
 
     private void createExplosion(Rectangle asteroid){
         explosionSound.play();
@@ -153,10 +134,10 @@ public class GameScreen implements Screen {
          * Fire
          *
          */
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && TimeUtils.nanoTime() - lastFiredTime > 200000000){
-            spaceShipSingleFire();
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && TimeUtils.nanoTime() - spaceShip.getLastFiredTime() > 200000000){
+            spaceShip.spaceShipSingleFire(shot);
         }
-        Iterator<Rectangle> singleShotIterator = singleShots.iterator();
+        Iterator<Rectangle> singleShotIterator = spaceShip.getSingleShots().iterator();
         while(singleShotIterator.hasNext()){
             Rectangle singleShot = singleShotIterator.next();
             singleShot.y += 800 * Gdx.graphics.getDeltaTime();
@@ -214,8 +195,8 @@ public class GameScreen implements Screen {
         game.batch.begin();
 
         game.batch.draw(spaceShip.getSpaceShipImage(), spaceShip.getSpaceShipRectangle().x, spaceShip.getSpaceShipRectangle().y, spaceShip.getSpaceShipRectangle().width, spaceShip.getSpaceShipRectangle().height);
-        for(Rectangle shot : singleShots){
-            game.batch.draw(shotImage, shot.x, shot.y, shot.width, shot.height);
+        for(Rectangle s : spaceShip.getSingleShots()){
+            game.batch.draw(shot.getShotImage(), s.x, s.y, s.width, s.height);
         }
         for(Rectangle a : asteroid.getAsteroids()){
             game.batch.draw(asteroid.getAsteroidImage(), a.x, a.y, a.width, a.height);
@@ -257,11 +238,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        shotImage.dispose();
+        shot.getShotImage().dispose();
         spaceShip.getSpaceShipImage().dispose();
         asteroid.getAsteroidImage().dispose();
         explosionImage.dispose();
-        shotSound.dispose();
+        shot.getShotSound().dispose();
         explosionSound.dispose();
     }
 
