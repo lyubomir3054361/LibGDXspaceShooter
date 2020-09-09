@@ -55,6 +55,7 @@ public class SpaceShip {
             @Override
             public void run() {
                 ammunition++;
+                needToReload = "reloading...";
                 if(ammunition == 3){
                     setReloading(false);
                     needToReload = "";
