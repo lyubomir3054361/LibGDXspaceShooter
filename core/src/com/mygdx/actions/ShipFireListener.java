@@ -15,8 +15,18 @@ import java.util.Iterator;
 public class ShipFireListener {
 
     public void checkForInputs(SpaceShip spaceShip, Asteroid astroObj, Shot shot, Explosion explosion, GameScreen gameScreen){
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && TimeUtils.nanoTime() - spaceShip.getLastFiredTime() > 200000000){
-            spaceShip.spaceShipSingleFire(shot);
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && TimeUtils.nanoTime() - spaceShip.getLastFiredTime() > 200000000 && !spaceShip.isReloading()){
+            if(spaceShip.getAmmunition() != 0){
+                spaceShip.fire(shot);
+                spaceShip.setAmmunition(spaceShip.getAmmunition() - 1);
+                if(spaceShip.getAmmunition() == 0){
+                    spaceShip.setReloading(true);
+                    spaceShip.setNeedToReload("Press R to reload!");
+                }
+            }
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R) && spaceShip.getAmmunition() == 0){
+            spaceShip.reload();
         }
         Iterator<Rectangle> singleShotIterator = spaceShip.getSingleShots().iterator();
         while(singleShotIterator.hasNext()){
@@ -38,5 +48,4 @@ public class ShipFireListener {
             }
         }
     }
-
 }

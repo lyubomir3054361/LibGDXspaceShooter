@@ -82,9 +82,10 @@ public class GameScreen implements Screen {
             game.batch.draw(asteroid.getAsteroidImage(), a.x, a.y, a.width, a.height);
         }
 
-        game.font.draw(game.batch, "Ammunition   " + spaceShip.getAmuSingleShot(), 50, 100);
+        game.font.draw(game.batch, "Ammunition   " + spaceShip.getAmmunition(), 50, 100);
         game.font.draw(game.batch, "Score  " + score, 200, 100);
         game.font.draw(game.batch, "Lifes  " + spaceShip.getLifesLeft(), 300, 100);
+        game.font.draw(game.batch, spaceShip.getNeedToReload(), 400, 100);
 
         game.batch.end();
 
@@ -123,6 +124,8 @@ public class GameScreen implements Screen {
         explosion.getExplosionImage().dispose();
         shot.getShotSound().dispose();
         explosion.getExplosionSound().dispose();
+        parallaxStarBackground.getStarsFastImage().dispose();
+        parallaxStarBackground.getStarsSlowImage().dispose();
     }
 
     public int getScore() {

@@ -1,23 +1,32 @@
 package com.mygdx.model;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.Timer;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class SpaceShip {
 
     private Texture spaceShipImage;
     private Rectangle spaceShipRectangle;
     private Array<Rectangle> singleShots;
+    private Sound movingSound;
     private int spaceShipSpeed;
     private int lifesLeft;
-    private int amuSingleShot;
+    private int ammunition;
     private long lastFiredTime;
-
+    private boolean reloading;
+    private String needToReload;
 
     public SpaceShip(){
         spaceShipImage = new Texture("spaceship2.png");
+        movingSound = Gdx.audio.newSound(Gdx.files.internal("moving_sound.mp3"));
         spaceShipRectangle = new Rectangle();
         spaceShipRectangle.x = 300 - 64;
         spaceShipRectangle.y = 200;
@@ -26,10 +35,11 @@ public class SpaceShip {
         spaceShipSpeed = 220;
         lifesLeft = 3;
         singleShots = new Array<>();
-        amuSingleShot = 3;
+        ammunition = 3;
+        needToReload = "";
     }
 
-    public void spaceShipSingleFire(Shot shot){
+    public void fire(Shot shot){
         Rectangle singleShot = new Rectangle();
         singleShot.width = 16;
         singleShot.height = 16;
@@ -38,6 +48,19 @@ public class SpaceShip {
         singleShots.add(singleShot);
         lastFiredTime = TimeUtils.nanoTime();
         shot.getShotSound().play(0.2f);
+    }
+
+    public void reload(){
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                ammunition++;
+                if(ammunition == 3){
+                    setReloading(false);
+                    needToReload = "";
+                }
+            }
+        }, 1, 15/20f, 2);
     }
 
     public Texture getSpaceShipImage() {
@@ -80,12 +103,12 @@ public class SpaceShip {
         this.singleShots = singleShots;
     }
 
-    public int getAmuSingleShot() {
-        return amuSingleShot;
+    public int getAmmunition() {
+        return ammunition;
     }
 
-    public void setAmuSingleShot(int amuSingleShot) {
-        this.amuSingleShot = amuSingleShot;
+    public void setAmmunition(int ammunition) {
+        this.ammunition = ammunition;
     }
 
     public long getLastFiredTime() {
@@ -94,5 +117,29 @@ public class SpaceShip {
 
     public void setLastFiredTime(long lastFiredTime) {
         this.lastFiredTime = lastFiredTime;
+    }
+
+    public Sound getMovingSound() {
+        return movingSound;
+    }
+
+    public void setMovingSound(Sound movingSound) {
+        this.movingSound = movingSound;
+    }
+
+    public boolean isReloading() {
+        return reloading;
+    }
+
+    public void setReloading(boolean reloading) {
+        this.reloading = reloading;
+    }
+
+    public String getNeedToReload() {
+        return needToReload;
+    }
+
+    public void setNeedToReload(String needToReload) {
+        this.needToReload = needToReload;
     }
 }
