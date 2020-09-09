@@ -18,7 +18,6 @@ public class Asteroid {
         asteroidImage = new Texture("asteroid.png");
         asteroidSpeed = 200;
         allAsteroids = new Array<>();
-
     }
 
     public void spawn(Array<Rectangle> asteroids){

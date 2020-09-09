@@ -36,7 +36,7 @@ public class SpaceShip {
         lifesLeft = 3;
         singleShots = new Array<>();
         ammunition = 3;
-        needToReload = "";
+        needToReload = "Ready to fire!";
     }
 
     public void fire(Shot shot){
@@ -51,17 +51,17 @@ public class SpaceShip {
     }
 
     public void reload(){
+        needToReload = "reloading...";
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
                 ammunition++;
-                needToReload = "reloading...";
                 if(ammunition == 3){
                     setReloading(false);
-                    needToReload = "";
+                    needToReload = "Ready to fire!";
                 }
             }
-        }, 1, 15/20f, 2);
+        }, 1, 1f, 2);
     }
 
     public Texture getSpaceShipImage() {
