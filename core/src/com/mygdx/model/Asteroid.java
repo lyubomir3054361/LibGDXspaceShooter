@@ -11,17 +11,17 @@ public class Asteroid {
     private Texture asteroidImage;
     private int asteroidSpeed;
     private long lastAsteroidSpawnTime;
-    private Array<Rectangle> asteroids;
+    private Array<Rectangle> allAsteroids;
 
 
     public Asteroid(){
         asteroidImage = new Texture("asteroid.png");
         asteroidSpeed = 200;
-        asteroids = new Array<>();
+        allAsteroids = new Array<>();
 
     }
 
-    public void spawnAsteroid(Array<Rectangle> asteroids){
+    public void spawn(Array<Rectangle> asteroids){
         Rectangle asteroid = new Rectangle();
         asteroid.width = MathUtils.random(48, 96);
         asteroid.height = MathUtils.random(48,96);
@@ -55,11 +55,11 @@ public class Asteroid {
         this.lastAsteroidSpawnTime = lastAsteroidSpawnTime;
     }
 
-    public Array<Rectangle> getAsteroids() {
-        return asteroids;
+    public Array<Rectangle> getAllAsteroids() {
+        return allAsteroids;
     }
 
-    public void setAsteroids(Array<Rectangle> asteroids) {
-        this.asteroids = asteroids;
+    public void setAllAsteroids(Array<Rectangle> allAsteroids) {
+        this.allAsteroids = allAsteroids;
     }
 }

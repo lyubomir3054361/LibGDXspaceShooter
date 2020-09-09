@@ -36,7 +36,7 @@ public class ShipFireListener {
             if(singleShot.y > 800){
                 singleShotIterator.remove();
             }
-            Iterator<Rectangle> asteroidShot = astroObj.getAsteroids().iterator();
+            Iterator<Rectangle> asteroidShot = astroObj.getAllAsteroids().iterator();
             while(asteroidShot.hasNext()){
                 Rectangle asteroid = asteroidShot.next();
                 if(asteroid.overlaps(singleShot)){

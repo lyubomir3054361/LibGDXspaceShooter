@@ -48,7 +48,7 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 600, 800);
         score = 0;
-        asteroid.spawnAsteroid(asteroid.getAsteroids());
+        asteroid.spawn(asteroid.getAllAsteroids());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class GameScreen implements Screen {
             game.batch.draw(shot.getShotImage(), s.x, s.y, s.width, s.height);
         }
 
-        for(Rectangle a : asteroid.getAsteroids()){
+        for(Rectangle a : asteroid.getAllAsteroids()){
             game.batch.draw(asteroid.getAsteroidImage(), a.x, a.y, a.width, a.height);
         }
 

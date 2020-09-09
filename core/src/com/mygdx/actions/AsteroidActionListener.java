@@ -16,9 +16,9 @@ public class AsteroidActionListener {
 
     public  void checkForInputs(SpaceShip spaceShip, Asteroid asteroid, Explosion explosion, SpaceBattle game, GameScreen gameScreen){
         if(TimeUtils.nanoTime() - asteroid.getLastAsteroidSpawnTime() > 1000000000){
-            asteroid.spawnAsteroid(asteroid.getAsteroids());
+            asteroid.spawn(asteroid.getAllAsteroids());
         }
-        Iterator<Rectangle> asteroidIterator = asteroid.getAsteroids().iterator();
+        Iterator<Rectangle> asteroidIterator = asteroid.getAllAsteroids().iterator();
         while(asteroidIterator.hasNext()){
 
             Rectangle iterator = asteroidIterator.next();
