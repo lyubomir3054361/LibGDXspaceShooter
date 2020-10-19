@@ -15,7 +15,7 @@ import com.mygdx.model.*;
 
 public class GameScreen implements Screen {
 
-    final SpaceBattle game;
+    private final SpaceBattle game;
     private OrthographicCamera camera;
 
     private SpaceShip spaceShip;
